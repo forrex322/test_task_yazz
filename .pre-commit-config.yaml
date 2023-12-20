@@ -4,15 +4,26 @@ default_language_version:
     python: python3.7
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v2.2.3
+  rev: v4.3.0
   hooks:
     - id: check-merge-conflict
     - id: debug-statements
     - id: check-ast
     - id: check-docstring-first
     - id: detect-private-key
-    - id: name-tests-test
-      args: ['--django']
       exclude: factories.py
-    - id: no-commit-to-branch
-      args: [--branch, develop, --branch, staging, --branch, master]
+- repo: https://github.com/psf/black
+  rev: 22.8.0
+  hooks:
+    - id: black
+      language_version: python3.8
+      stages: [commit]
+      exclude: migrations/
+- repo: https://github.com/pycqa/flake8
+  rev: 3.9.2
+  hooks:
+    - id: flake8
+      language_version: python3.8
+      stages: [commit]
+      exclude: migrations/
+

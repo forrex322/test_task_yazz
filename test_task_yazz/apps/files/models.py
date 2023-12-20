@@ -18,15 +18,15 @@ from files.processors import EXIFOrientation
 def get_file_upload_path(instance, filename):
     _, ext = os.path.splitext(filename)
 
-    return '{0}/{1}/{2}{3}'.format(
+    return "{0}/{1}/{2}{3}".format(
         instance.upload_prefix,
-        timezone.now().strftime('%y/%m'),
+        timezone.now().strftime("%y/%m"),
         uuid.uuid4().hex,
-        ext.lower())
+        ext.lower(),
+    )
 
 
 class FileQuerySet(models.QuerySet):  # pragma: no cover
-
     def delete(self):
         for obj in self.iterator():
             default_storage.delete(obj.file.name)
@@ -56,8 +56,7 @@ class File(TimeStampedModel):
         return self.__class__.__name__.lower()
 
 
-class AvatarQuerySet(models.QuerySet):
-
+class PhotoQuerySet(models.QuerySet):
     def delete(self):
         for obj in self.iterator():
             default_storage.delete(obj.thumbnail.name)
@@ -67,15 +66,18 @@ class AvatarQuerySet(models.QuerySet):
 
 class Avatar(File):
     file = models.ImageField(upload_to=get_file_upload_path)
-    thumbnail = ImageSpecField(source='file',
-                               processors=[
-                                   EXIFOrientation(),
-                                   ResizeToFit(*settings.FILES_AVATAR_THUMB_SIZE,
-                                               anchor=Anchor.CENTER, upscale=False),
-                               ],
-                               format=settings.FILES_AVATAR_EXTENSION,
-                               options={'quality': settings.FILES_AVATAR_THUMB_QUALITY})
-    objects = AvatarQuerySet.as_manager()
+    thumbnail = ImageSpecField(
+        source="file",
+        processors=[
+            EXIFOrientation(),
+            ResizeToFit(
+                *settings.FILES_AVATAR_THUMB_SIZE, anchor=Anchor.CENTER, upscale=False
+            ),
+        ],
+        format=settings.FILES_AVATAR_EXTENSION,
+        options={"quality": settings.FILES_AVATAR_THUMB_QUALITY},
+    )
+    objects = PhotoQuerySet.as_manager()
 
     class Meta:
         verbose_name = _("user's avatar")
@@ -83,6 +85,42 @@ class Avatar(File):
 
     def __str__(self):
         return f"Avatar of user {self.creator_id}"
+
+    def delete(self, using=None, keep_parents=False):
+        default_storage.delete(self.thumbnail.name)  # pylint: disable=no-member
+        return super().delete(using, keep_parents)
+
+    def get_absolute_url(self):
+        return reverse("api:files:avatars-detail", args=(self.id,))
+
+
+class ProductImage(File):
+    creator = models.ForeignKey(
+        "users.User", on_delete=models.CASCADE, related_name="images"
+    )
+    product = models.ForeignKey(
+        "shops.Product", on_delete=models.CASCADE, related_name="images", null=True
+    )
+    file = models.ImageField(upload_to=get_file_upload_path)
+    thumbnail = ImageSpecField(
+        source="file",
+        processors=[
+            EXIFOrientation(),
+            ResizeToFit(
+                *settings.FILES_AVATAR_THUMB_SIZE, anchor=Anchor.CENTER, upscale=False
+            ),
+        ],
+        format=settings.FILES_AVATAR_EXTENSION,
+        options={"quality": settings.FILES_AVATAR_THUMB_QUALITY},
+    )
+    objects = PhotoQuerySet.as_manager()
+
+    class Meta:
+        verbose_name = _("product's photo")
+        verbose_name_plural = _("product's photos")
+
+    def __str__(self):
+        return f"Photo of product {self.product_id}"
 
     def delete(self, using=None, keep_parents=False):
         default_storage.delete(self.thumbnail.name)  # pylint: disable=no-member
