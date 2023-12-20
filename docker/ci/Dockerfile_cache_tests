@@ -1,0 +1,12 @@
+FROM python:3.8-slim-buster
+ARG CI_PROJECT_DIR
+WORKDIR ${CI_PROJECT_DIR}
+RUN apt update && apt install -y --no-install-recommends cowsay \
+                                                         libpq-dev \
+                                                         git \
+                                                         build-essential \
+                                                         libgdal20 && \
+                                                         rm -rf /var/lib/apt/lists/*
+COPY requirements requirements
+RUN pip install --exists-action=s -r requirements/base.txt -r requirements/testing.txt
+

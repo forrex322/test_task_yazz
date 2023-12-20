@@ -1,0 +1,7 @@
+# PRECAUTION: avoid production dependencies that aren't in development
+
+-r ./base.txt
+
+gevent==21.8.0  # https://github.com/gevent/gevent
+gunicorn==20.1.0  # https://github.com/benoitc/gunicorn
+psycopg2==2.8.6 --no-binary psycopg2  # https://github.com/psycopg/psycopg2

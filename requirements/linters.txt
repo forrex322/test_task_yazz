@@ -1,0 +1,12 @@
+# Code standards
+# ------------------------------------------------------------------------------
+black==19.3b0  # https://github.com/ambv/black
+
+# Linters
+# ------------------------------------------------------------------------------
+flake8==4.0.1  # https://github.com/PyCQA/flake8
+
+pylint==2.14.5  # https://github.com/PyCQA/pylint
+pylint-plugin-utils==0.6  # https://github.com/PyCQA/pylint-plugin-utils
+pylint-django==2.0.13  # https://github.com/PyCQA/pylint-django
+pylint-celery==0.3  # https://github.com/PyCQA/pylint-celery
